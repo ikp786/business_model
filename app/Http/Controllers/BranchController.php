@@ -33,8 +33,8 @@ class BranchController extends Controller
      */
     public function store(StoreBranchRequest $request)
     {       
-        $validatedData = $request->all();    
-
+        try{
+        $validatedData = $request->all();
         $branch = new Branch();
         $branch->name = $request->name;        
         $branch->business_id = $request->business_id;
@@ -51,8 +51,7 @@ class BranchController extends Controller
         }
 
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                // $imagePath = $image->store('branch_images');
+            foreach ($request->file('images') as $image) {                
                 $imagePath = time() . '.' . $image->extension();
                 $image->move(public_path('branch_images'), $imagePath);
                 $branch->images()->create([
@@ -61,6 +60,9 @@ class BranchController extends Controller
             }
         }      
         return redirect()->route('branches.show',$branch->id)->with('success', 'Branch created successfully!');
+    }catch(\Throwable $e){
+        return redirect()->back()->with('failed',$e->getMessage(). "On Line". $e->getLine());
+    }
     }
 
     /**
